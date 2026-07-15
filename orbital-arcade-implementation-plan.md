@@ -203,5 +203,5 @@ color.rgb *= scan;
 - [x] CRT shader + bloom
 - [x] Typewriter + sound effects
 - [x] NEO radar ring
-- [ ] Ground track drawn for selected object (rotating frame)
+- [x] Ground track drawn for selected object (rotating frame)
 - [ ] Deployed as static site

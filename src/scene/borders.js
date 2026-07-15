@@ -1,18 +1,7 @@
 import * as THREE from 'three';
 import { mesh } from 'topojson-client';
 import world from 'world-atlas/countries-110m.json';
-
-// Same lat/lon -> scene mapping we'll use for ECEF in Phase 3:
-// scene.x = cos(lat)cos(lon), scene.y = sin(lat), scene.z = -cos(lat)sin(lon)
-function latLonToVec3(latDeg, lonDeg, radius) {
-  const lat = THREE.MathUtils.degToRad(latDeg);
-  const lon = THREE.MathUtils.degToRad(lonDeg);
-  return new THREE.Vector3(
-    radius * Math.cos(lat) * Math.cos(lon),
-    radius * Math.sin(lat),
-    -radius * Math.cos(lat) * Math.sin(lon)
-  );
-}
+import { latLonToVec3 } from '../orbits/coords.js';
 
 // Long straight borders (e.g. the 49th parallel) are single segments in the
 // data; subdivide so their chords don't cut through the sphere.

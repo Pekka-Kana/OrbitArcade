@@ -6,6 +6,7 @@ import { createSatellites } from './scene/satellites.js';
 import { createIss, ISS_NORAD_ID } from './scene/iss.js';
 import { createAsteroids } from './scene/asteroids.js';
 import { buildOrbitPath } from './scene/orbitPath.js';
+import { buildGroundTrack } from './scene/groundTrack.js';
 import { createHud } from './ui/hud.js';
 import { createChrome } from './ui/chrome.js';
 import { createControlPanel } from './ui/controls.js';
@@ -170,9 +171,13 @@ function selectSat(index) {
   sat.satrec ??= buildSatrec(sat.omm);
   if (!sat.satrec) return;
   satellites.setSelected(index);
-  const orbitLine = buildOrbitPath(sat.satrec, simDate, 1440 / sat.omm.MEAN_MOTION);
+  const periodMin = 1440 / sat.omm.MEAN_MOTION;
+  const orbitLine = buildOrbitPath(sat.satrec, simDate, periodMin);
   scene.add(orbitLine);
-  selection = { type: 'sat', index, orbitLine };
+  // Ground track is a child of the rotating Earth: pinned to continents
+  const groundTrack = buildGroundTrack(sat.satrec, simDate, periodMin);
+  earth.add(groundTrack);
+  selection = { type: 'sat', index, orbitLine, groundTrack };
   hud.show(sat, simDate);
 }
 
@@ -186,9 +191,12 @@ function selectIss() {
       o.material = HIGHLIGHT_MATERIAL;
     }
   });
-  const orbitLine = buildOrbitPath(sat.satrec, simDate, 1440 / sat.omm.MEAN_MOTION);
+  const periodMin = 1440 / sat.omm.MEAN_MOTION;
+  const orbitLine = buildOrbitPath(sat.satrec, simDate, periodMin);
   scene.add(orbitLine);
-  selection = { type: 'iss', restore, orbitLine };
+  const groundTrack = buildGroundTrack(sat.satrec, simDate, periodMin);
+  earth.add(groundTrack);
+  selection = { type: 'iss', restore, orbitLine, groundTrack };
   hud.show(sat, simDate);
 }
 
@@ -201,6 +209,11 @@ function deselect() {
     scene.remove(selection.orbitLine);
     selection.orbitLine.geometry.dispose();
     selection.orbitLine.material.dispose();
+  }
+  if (selection.groundTrack) {
+    earth.remove(selection.groundTrack);
+    selection.groundTrack.geometry.dispose();
+    selection.groundTrack.material.dispose();
   }
   selection = null;
   hud.hide();

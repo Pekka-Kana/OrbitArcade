@@ -1,6 +1,6 @@
-import { json2satrec, propagate, gstime } from 'satellite.js';
+import { json2satrec, propagate, gstime, eciToGeodetic } from 'satellite.js';
 
-export { gstime };
+export { gstime, eciToGeodetic };
 
 // OMM JSON (CelesTrak FORMAT=json) -> satrec, or null if the record is bad
 export function buildSatrec(omm) {
