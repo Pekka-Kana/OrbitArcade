@@ -1,4 +1,7 @@
-import { json2satrec, propagate } from 'satellite.js';
+// Deep imports on purpose — see propagate.js: the package root drags in
+// a WASM build that breaks Vite's worker bundling
+import { json2satrec } from 'satellite.js/dist/io.js';
+import { propagate } from 'satellite.js/dist/propagation.js';
 
 // SGP4 for the whole catalog, off the main thread. Every tick it posts
 // ECI positions + velocities (km, km/s) as transferable Float32Arrays;
