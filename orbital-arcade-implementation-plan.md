@@ -204,4 +204,4 @@ color.rgb *= scan;
 - [x] Typewriter + sound effects
 - [x] NEO radar ring
 - [x] Ground track drawn for selected object (rotating frame)
-- [ ] Deployed as static site
+- [x] Deployed as static site — https://pekka-kana.github.io/OrbitArcade/
