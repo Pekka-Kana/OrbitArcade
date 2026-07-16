@@ -3,7 +3,15 @@ import { getFamilyColor } from '../scene/satModels.js';
 
 const FAMILY_LABELS = {
   starlink: 'STARLINK',
+  oneweb: 'ONEWEB',
+  geo: 'GEO COMSATS',
   payload: 'PAYLOADS',
+  iridium: 'IRIDIUM',
+  earthobs: 'EARTH OBS',
+  beidou: 'BEIDOU',
+  galileo: 'GALILEO',
+  gps: 'GPS',
+  weather: 'WEATHER',
   cosmos: 'COSMOS',
   spacemobile: 'SPACEMOBILE',
   hubble: 'HUBBLE',

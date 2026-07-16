@@ -100,6 +100,47 @@ function buildStation() {
   return g;
 }
 
+// OneWeb: small bus with one deployed solar panel
+function buildOneWeb() {
+  const bus = edges(new THREE.BoxGeometry(0.03, 0.03, 0.04));
+  const panel = edges(new THREE.PlaneGeometry(0.03, 0.09));
+  panel.rotateX(-Math.PI / 2);
+  panel.translate(0, 0, -0.07);
+  return mergeGeometries([bus, panel], false);
+}
+
+// GNSS navsat (GPS / Galileo / BeiDou): boxy bus with two long panels
+function buildNavsat() {
+  const bus = edges(new THREE.BoxGeometry(0.04, 0.04, 0.05));
+  const panelL = edges(new THREE.PlaneGeometry(0.11, 0.04));
+  panelL.rotateX(-Math.PI / 2);
+  panelL.translate(-0.08, 0, 0);
+  const panelR = panelL.clone();
+  panelR.translate(0.16, 0, 0);
+  return mergeGeometries([bus, panelL, panelR], false);
+}
+
+// Iridium: triangular bus trailing a single panel
+function buildIridium() {
+  const bus = edges(new THREE.CylinderGeometry(0.03, 0.03, 0.08, 3));
+  bus.rotateX(Math.PI / 2);
+  const panel = edges(new THREE.PlaneGeometry(0.03, 0.07));
+  panel.rotateX(-Math.PI / 2);
+  panel.translate(0, 0.03, -0.06);
+  return mergeGeometries([bus, panel], false);
+}
+
+// GEO comsat: large box bus with a wide solar wingspan
+function buildGeo() {
+  const bus = edges(new THREE.BoxGeometry(0.06, 0.06, 0.06));
+  const panelL = edges(new THREE.PlaneGeometry(0.13, 0.055));
+  panelL.rotateX(-Math.PI / 2);
+  panelL.translate(-0.11, 0, 0);
+  const panelR = panelL.clone();
+  panelR.translate(0.22, 0, 0);
+  return mergeGeometries([bus, panelL, panelR], false);
+}
+
 const FAMILIES = {
   rocketBody: { color: 0xff7700, build: buildRocketBody },
   payload: { color: 0xffff00, build: buildPayload },
@@ -108,6 +149,14 @@ const FAMILIES = {
   starlink: { color: 0x99aaff, build: buildStarlink },
   hubble: { color: 0x00ffff, build: buildHubble },
   station: { color: 0xff00ff, build: buildStation },
+  oneweb: { color: 0x2277ff, build: buildOneWeb },
+  gps: { color: 0x00ff88, build: buildNavsat },
+  galileo: { color: 0xaaff33, build: buildNavsat },
+  beidou: { color: 0xff9922, build: buildNavsat },
+  iridium: { color: 0xff44aa, build: buildIridium },
+  weather: { color: 0x33ccff, build: buildPayload },
+  earthobs: { color: 0x00ccaa, build: buildPayload },
+  geo: { color: 0x9955ff, build: buildGeo },
 };
 
 export function classify(omm) {
@@ -116,8 +165,18 @@ export function classify(omm) {
   if (/^COSMOS/.test(n)) return 'cosmos';
   if (/^SPACEMOBILE/.test(n)) return 'spacemobile';
   if (/^STARLINK/.test(n)) return 'starlink';
+  if (/^ONEWEB/.test(n)) return 'oneweb';
+  if (/^IRIDIUM/.test(n)) return 'iridium';
+  if (/NAVSTAR|GPS BII/.test(n)) return 'gps';
+  if (/GSAT|GALILEO/.test(n)) return 'galileo';
+  if (/BEIDOU/.test(n)) return 'beidou';
+  if (/NOAA|METEOR|METOP|GOES|DMSP|FENGYUN|FY-/.test(n)) return 'weather';
+  if (/TERRA|AQUA|LANDSAT|SENTINEL|ALOS|ENVISAT|SPOT|WORLDVIEW|YAOGAN|GAOFEN|RESURS|OKEAN|ERS-/.test(n))
+    return 'earthobs';
   if (/HST/.test(n)) return 'hubble';
   if (/CSS|TIANHE|SZ-\d/.test(n)) return 'station';
+  // Geostationary belt has no consistent naming — identify it by orbit
+  if (omm.MEAN_MOTION > 0.9 && omm.MEAN_MOTION < 1.1 && omm.INCLINATION < 15) return 'geo';
   return 'payload';
 }
 

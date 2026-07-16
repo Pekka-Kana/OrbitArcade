@@ -21,6 +21,12 @@
   box-shadow: 0 0 14px rgba(0, 255, 102, 0.3);
 }
 
+/* Many families now — keep the panel on-screen on short viewports */
+#filters {
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+}
+
 .controls-title {
   margin-bottom: 6px;
   font-size: 16px;
