@@ -110,5 +110,5 @@ export function createHud() {
     }
   }
 
-  return { show, showNeo, hide, update };
+  return { show, showNeo, hide, update, panel: el };
 }

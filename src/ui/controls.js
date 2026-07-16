@@ -113,4 +113,7 @@ export function createControlPanel({ families, onToggleFamily, search, onPick })
 
   root.append(finder, filters);
   document.body.appendChild(root);
+
+  // Expose the nodes so mobile mode can re-parent them into bottom sheets
+  return { root, finder, filters };
 }

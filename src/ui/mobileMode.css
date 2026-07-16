@@ -1,0 +1,180 @@
+/* ============================================================
+   Mobile mode — bottom toolbar + sheets. Everything here is
+   inert until <body> gets the .mobile class (set from a
+   matchMedia('(max-width: 640px)') query in main.js).
+   ============================================================ */
+
+/* ---- Bottom toolbar ---- */
+#mobile-bar {
+  display: none;
+}
+body.mobile #mobile-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 40;
+  display: flex;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  background: rgba(0, 12, 5, 0.92);
+  border-top: 1px solid #00ff66;
+  box-shadow: 0 -4px 18px rgba(0, 255, 102, 0.25);
+}
+
+.mobile-btn {
+  flex: 1;
+  min-height: 52px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  background: transparent;
+  border: none;
+  border-right: 1px solid rgba(0, 255, 102, 0.25);
+  color: #00ff66;
+  font-family: 'VT323', 'Courier New', monospace;
+  letter-spacing: 2px;
+  text-shadow: 0 0 6px rgba(0, 255, 102, 0.6);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.mobile-btn:last-child {
+  border-right: none;
+}
+.mobile-btn .glyph {
+  font-size: 20px;
+  line-height: 1;
+}
+.mobile-btn .lbl {
+  font-size: 13px;
+}
+.mobile-btn.active {
+  background: rgba(0, 255, 102, 0.15);
+  color: #aaffcc;
+}
+/* TARGET stays dim until an object is selected, then pulses to invite a tap */
+.mobile-btn[data-sheet='target']:not(.enabled) {
+  opacity: 0.35;
+}
+.mobile-btn[data-sheet='target'].enabled:not(.active) {
+  animation: mobile-pulse 1.4s ease-in-out infinite;
+}
+@keyframes mobile-pulse {
+  50% {
+    color: #ffff66;
+    text-shadow: 0 0 10px rgba(255, 255, 102, 0.9);
+  }
+}
+
+/* ---- Backdrop ---- */
+#mobile-backdrop {
+  display: none;
+}
+body.mobile #mobile-backdrop.open {
+  display: block;
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+/* ---- Sheets ---- */
+.sheet {
+  display: none;
+}
+body.mobile .sheet {
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(52px + env(safe-area-inset-bottom, 0px));
+  z-index: 30;
+  max-height: 62vh;
+  background: rgba(0, 20, 8, 0.96);
+  border-top: 1px solid #00ff66;
+  box-shadow: 0 -6px 22px rgba(0, 255, 102, 0.3);
+  transform: translateY(120%);
+  transition: transform 0.22s ease;
+}
+body.mobile .sheet.open {
+  transform: translateY(0);
+}
+
+.sheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  border-bottom: 1px solid rgba(0, 255, 102, 0.3);
+  color: #00ff66;
+  font-family: 'VT323', 'Courier New', monospace;
+  font-size: 18px;
+  letter-spacing: 3px;
+  text-shadow: 0 0 6px rgba(0, 255, 102, 0.6);
+}
+.sheet-close {
+  background: transparent;
+  border: none;
+  color: #00ff66;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 6px;
+}
+.sheet-body {
+  overflow-y: auto;
+  padding: 12px 14px calc(14px + env(safe-area-inset-bottom, 0px));
+  /* #filters/#finder inherit their green from #controls on desktop; once
+     re-parented into a sheet they'd fall back to black, so restore it here */
+  color: #00ff66;
+  font-family: 'VT323', 'Courier New', monospace;
+  text-shadow: 0 0 6px rgba(0, 255, 102, 0.6);
+}
+
+/* ---- Panels adapt when they live inside a sheet ---- */
+body.mobile #controls {
+  display: none; /* now empty — its children moved into the sheets */
+}
+body.mobile #finder,
+body.mobile #filters,
+body.mobile #hud-panel {
+  position: static;
+  top: auto;
+  left: auto;
+  right: auto;
+  min-width: 0;
+  width: 100%;
+  max-height: none;
+  border: none;
+  box-shadow: none;
+  background: transparent;
+  padding: 0;
+}
+/* Section titles are redundant with the sheet header */
+body.mobile .sheet-body .controls-title {
+  display: none;
+}
+
+/* Bigger touch targets */
+body.mobile .filter-row {
+  min-height: 44px;
+}
+body.mobile #finder-results li {
+  padding: 10px 4px;
+}
+body.mobile #finder-input {
+  font-size: 20px;
+}
+
+/* ---- Topbar shrinks; the blinking status is dropped for room ---- */
+body.mobile #topbar {
+  font-size: 15px;
+  letter-spacing: 1px;
+  padding: 8px 12px;
+  padding-top: calc(8px + env(safe-area-inset-top, 0px));
+}
+body.mobile #topbar #status {
+  display: none;
+}

@@ -10,6 +10,7 @@ import { buildGroundTrack } from './scene/groundTrack.js';
 import { createHud } from './ui/hud.js';
 import { createChrome } from './ui/chrome.js';
 import { createControlPanel } from './ui/controls.js';
+import { createMobileMode } from './ui/mobileMode.js';
 import { createCrt } from './fx/crt.js';
 import { fetchSatelliteData } from './data/celestrak.js';
 import { fetchNeoData } from './data/neows.js';
@@ -86,7 +87,7 @@ fetchSatelliteData().then((ommData) => {
   updateTrackedCount();
   console.log(`[orbital-arcade] tracking ${records.length} objects + ISS`);
 
-  createControlPanel({
+  const controlPanel = createControlPanel({
     families: satellites.familyInfo(),
     onToggleFamily: (family, visible) => {
       satellites.setFamilyVisible(family, visible);
@@ -113,14 +114,37 @@ fetchSatelliteData().then((ommData) => {
       }
       return matches;
     },
-    onPick: (id) => (id === 'iss' ? selectIss() : selectSat(id)),
+    onPick: (id) => {
+      id === 'iss' ? selectIss() : selectSat(id);
+      mobile?.openTarget();
+    },
   });
+
+  mobile = createMobileMode({
+    controlsRoot: controlPanel.root,
+    finder: controlPanel.finder,
+    filters: controlPanel.filters,
+    hudPanel: hud.panel,
+  });
+  mobile.apply(mobileQuery.matches);
 });
 
 // ---- CRT post-processing + arcade chrome (Phase 5) ----
 
 const crt = createCrt(renderer, scene, camera);
 const chrome = createChrome();
+
+// Mobile mode: below 640px the panels become toolbar-driven bottom sheets.
+// The <body> class is toggled up front (styles the topbar before satellite
+// data arrives); `mobile` is wired once the control panel is built.
+let mobile = null;
+const mobileQuery = window.matchMedia('(max-width: 640px)');
+function syncMobile() {
+  document.body.classList.toggle('mobile', mobileQuery.matches);
+  mobile?.apply(mobileQuery.matches);
+}
+mobileQuery.addEventListener('change', syncMobile);
+syncMobile();
 
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
@@ -170,6 +194,7 @@ function selectNeo(index) {
   asteroids.setSelected(index);
   selection = { type: 'neo' };
   hud.showNeo(asteroids.neos[index]);
+  mobile?.setHasTarget(true);
 }
 
 function selectSat(index) {
@@ -187,6 +212,7 @@ function selectSat(index) {
   earth.add(groundTrack);
   selection = { type: 'sat', index, orbitLine, groundTrack };
   hud.show(sat, simDate);
+  mobile?.setHasTarget(true);
 }
 
 function selectIss() {
@@ -206,6 +232,7 @@ function selectIss() {
   earth.add(groundTrack);
   selection = { type: 'iss', restore, orbitLine, groundTrack };
   hud.show(sat, simDate);
+  mobile?.setHasTarget(true);
 }
 
 function deselect() {
@@ -225,6 +252,7 @@ function deselect() {
   }
   selection = null;
   hud.hide();
+  mobile?.setHasTarget(false);
 }
 
 // Distinguish a click from an OrbitControls drag by pointer travel
@@ -241,6 +269,7 @@ renderer.domElement.addEventListener('pointerup', (e) => {
   else if (hit?.type === 'sat') selectSat(hit.index);
   else if (hit?.type === 'neo') selectNeo(hit.index);
   else deselect();
+  if (hit) mobile?.openTarget();
 });
 
 // Double-click smoothly returns the orbit target to Earth's center, undoing
