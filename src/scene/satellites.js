@@ -259,6 +259,15 @@ export function createSatellites(sats, { simStartMs, timeWarp }) {
       .sort((a, b) => b.count - a.count);
   }
 
+  // Count of currently-shown objects (excludes filtered-out families)
+  function visibleCount() {
+    let total = 0;
+    for (const [family, list] of members) {
+      if (!hiddenFamilies.has(family)) total += list.length;
+    }
+    return total;
+  }
+
   const getFamily = (i) => familyOf[i];
   const isIndexVisible = (i) => !hiddenFamilies.has(familyOf[i]);
 
@@ -270,6 +279,7 @@ export function createSatellites(sats, { simStartMs, timeWarp }) {
     sats,
     setFamilyVisible,
     familyInfo,
+    visibleCount,
     getFamily,
     isIndexVisible,
   };

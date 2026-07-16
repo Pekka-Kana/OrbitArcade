@@ -61,6 +61,13 @@ fetchNeoData().then((neos) => {
 
 let satellites = null;
 let iss = null;
+
+// Top-bar counter reflects only currently-shown objects (filters + ISS)
+function updateTrackedCount() {
+  const satCount = satellites ? satellites.visibleCount() : 0;
+  chrome.setTrackedCount(satCount + (iss ? 1 : 0));
+}
+
 fetchSatelliteData().then((ommData) => {
   const records = ommData.map((omm) => ({ omm }));
   // The ISS gets its own wireframe model instead of an instanced blip;
@@ -76,13 +83,14 @@ fetchSatelliteData().then((ommData) => {
   }
   satellites = createSatellites(records, { simStartMs, timeWarp: TIME_WARP });
   scene.add(satellites.group);
-  chrome.setTrackedCount(records.length + (iss ? 1 : 0));
+  updateTrackedCount();
   console.log(`[orbital-arcade] tracking ${records.length} objects + ISS`);
 
   createControlPanel({
     families: satellites.familyInfo(),
     onToggleFamily: (family, visible) => {
       satellites.setFamilyVisible(family, visible);
+      updateTrackedCount();
       // Selected object vanishing under the filter would strand the HUD
       if (
         !visible &&
