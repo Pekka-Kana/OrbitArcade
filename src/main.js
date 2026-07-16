@@ -224,6 +224,7 @@ const downPos = { x: 0, y: 0 };
 renderer.domElement.addEventListener('pointerdown', (e) => {
   downPos.x = e.clientX;
   downPos.y = e.clientY;
+  recentering = false; // a new drag/pan cancels an in-flight re-center
 });
 renderer.domElement.addEventListener('pointerup', (e) => {
   if (Math.hypot(e.clientX - downPos.x, e.clientY - downPos.y) > 6) return;
@@ -233,6 +234,25 @@ renderer.domElement.addEventListener('pointerup', (e) => {
   else if (hit?.type === 'neo') selectNeo(hit.index);
   else deselect();
 });
+
+// Double-click smoothly returns the orbit target to Earth's center, undoing
+// any pan drift. The dblclick fires after its two pointerups, so the
+// pointerdown cancel above doesn't fight it.
+const ORIGIN = new THREE.Vector3(0, 0, 0);
+const RECENTER_LERP = 0.12;
+let recentering = false;
+renderer.domElement.addEventListener('dblclick', () => {
+  recentering = true;
+});
+
+function updateRecenter() {
+  if (!recentering) return;
+  controls.target.lerp(ORIGIN, RECENTER_LERP);
+  if (controls.target.lengthSq() < 1e-6) {
+    controls.target.copy(ORIGIN);
+    recentering = false;
+  }
+}
 
 // ---- Attract mode: after 30s idle, auto-rotate and tour random objects ----
 
@@ -300,6 +320,7 @@ renderer.setAnimationLoop(() => {
   if (asteroids) asteroids.update(timer.getElapsed());
   hud.update(simDate);
   updateAttract();
+  updateRecenter();
   controls.update();
   crt.render(timer.getElapsed());
 });
